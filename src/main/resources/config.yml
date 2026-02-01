@@ -1,0 +1,12 @@
+maxPlayersInClan: 3 # from 2 to 28
+messages:
+  notPlayer: "§cYou are not a player!"
+  alreadyInClan: "§cYou are already a part of a clan!"
+  notInClan: "§cYou aren't in a clan!"
+  noArgs: "§cNot enough args!"
+  clanCreated: "§aClan created!"
+guis:
+  MyClanGUI:
+    title: "My clan"
+data:
+  clans: {}

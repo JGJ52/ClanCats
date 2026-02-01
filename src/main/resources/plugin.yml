@@ -1,0 +1,10 @@
+name: ClanCats
+version: '1.0'
+main: hu.jgj52.clanCats.ClanCats
+api-version: '1.21'
+authors: [ JGJ52 ]
+commands:
+  clan:
+    permission: clancats.command.clan
+    aliases:
+      - c
