@@ -4,9 +4,22 @@ messages:
   alreadyInClan: "§cYou are already a part of a clan!"
   notInClan: "§cYou aren't in a clan!"
   noArgs: "§cNot enough args!"
+  noPerm: "§cYou don't have permission to run this command!"
+  scNotFound: "§cSubcommand not found!"
   clanCreated: "§aClan created!"
+  clanMembers: "§7%value% members" # value = member count
+  clanName: "§f%value%"
+  disbanded: "§eClan disbanded!"
+  noPlayer: "§c%value% not found!" # value = player's name
+  inviteSent: "§aInvite sent successfully!"
+  gotInvite: "<gold>You got an invite to the %value% clan!\nClick here to accept: <accept>" # value = clan name <accept> = button
+  acceptInviteButton: "[Accept]"
 guis:
   MyClanGUI:
     title: "My clan"
+roles:
+  OWNER: "§4Owner"
+  ADMIN: "§cAdmin"
+  MEMBER: "§7Member"
 data:
   clans: {}

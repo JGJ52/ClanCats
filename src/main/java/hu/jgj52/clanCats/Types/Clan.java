@@ -110,4 +110,9 @@ public class Clan {
     public void setRole(Player player, Role role) {
         setRole(Bukkit.getOfflinePlayer(player.getUniqueId()), role);
     }
+
+    public void disband() {
+        plugin.getConfig().set("data.clans." + id, null);
+        save();
+    }
 }
