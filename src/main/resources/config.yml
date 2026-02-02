@@ -14,6 +14,12 @@ messages:
   inviteSent: "§aInvite sent successfully!"
   gotInvite: "<gold>You got an invite to the %value% clan!\nClick here to accept: <accept>" # value = clan name <accept> = button
   acceptInviteButton: "[Accept]"
+  joined: "§a%value% has joined this clan!" # value = joined player's name
+  promoted: "§a%value% got promoted!" # value = the player's name who got promoted
+  demoted: "§c%value% got demoted!" # value = the player's name who got demoted
+  transferred: "§e%value% became the new owner of the clan!" # value = the player's name who became owner
+  clanFull: "§cThe clan is full! You can't invite anymore members."
+  kicked: "§c%value% got kicked out of the clan." # value = kicked player's name
 guis:
   MyClanGUI:
     title: "My clan"

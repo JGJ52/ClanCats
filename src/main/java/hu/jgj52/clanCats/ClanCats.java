@@ -15,6 +15,8 @@ public final class ClanCats extends JavaPlugin {
         saveConfig();
 
         getCommand("clan").setExecutor(new ClanCommand());
+
+        //todo: listener for MyClanGUI so players wont steal the heads and stuff
     }
 
     @Override

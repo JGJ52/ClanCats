@@ -63,6 +63,16 @@ public class Clan {
         return players;
     }
 
+    public List<Player> getOnlinePlayers() {
+        List<Player> players = new ArrayList<>();
+        for (OfflinePlayer op : this.players) {
+            if (op.getPlayer() != null) {
+                players.add(op.getPlayer());
+            }
+        }
+        return players;
+    }
+
     public void setName(String name) {
         plugin.getConfig().set("data.clans." + id + ".name", name);
         save();
@@ -73,6 +83,7 @@ public class Clan {
         List<String> players = plugin.getConfig().getStringList("data.clans." + id + ".players");
         players.add(player.getUniqueId().toString());
         plugin.getConfig().set("data.clans." + id + ".players", players);
+        setRole(player, Role.MEMBER);
         save();
         this.players.add(player);
     }
@@ -102,7 +113,7 @@ public class Clan {
     }
 
     public void setRole(OfflinePlayer player, Role role) {
-        plugin.getConfig().set("data.clans." + id + ".roles." + player.getUniqueId(), role);
+        plugin.getConfig().set("data.clans." + id + ".roles." + player.getUniqueId(), role.name());
         save();
         roles.put(player, role);
     }
