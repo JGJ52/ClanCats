@@ -18,7 +18,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
-import org.checkerframework.checker.mustcall.qual.Owning;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -32,6 +31,7 @@ import static hu.jgj52.clanCats.ClanCats.plugin;
 public class ClanCommand implements CommandExecutor, TabCompleter {
     private final Map<String, Function<Context, Boolean>> subcommands = new HashMap<>();
     private final Map<String, Function<Context, List<String>>> subcommandsub = new HashMap<>();
+    private final Map<String, Function<Context, Boolean>> hasPerm = new HashMap<>();
     private final Map<Player, Set<Clan>> invites = new HashMap<>();
 
     private record Context(Player player, Clan clan, String[] args) {}
@@ -96,6 +96,7 @@ public class ClanCommand implements CommandExecutor, TabCompleter {
                         player.sendMessage(Replacer.value(Message.getMessage("noPlayer"), args[1]));
                         return true;
                     }
+                    if (Clan.fromPlayer(target) != null) return true;
                     if (invites.containsKey(target)) {
                         invites.get(target).add(clan);
                     } else {
@@ -125,6 +126,10 @@ public class ClanCommand implements CommandExecutor, TabCompleter {
             for (Clan c : invites.get(player)) {
                 if (args[1].equals(c.getName())) {
                     invites.get(player).remove(c);
+                    if (c.getPlayers().size() > plugin.getConfig().getInt("maxPlayersInClan")) {
+                        player.sendMessage(Message.getMessage("clanBecameFull"));
+                        return true;
+                    }
                     c.addPlayer(player);
                     for (Player p : c.getOnlinePlayers()) {
                         p.sendMessage(Replacer.value(Message.getMessage("joined"), player.getName()));
@@ -146,12 +151,8 @@ public class ClanCommand implements CommandExecutor, TabCompleter {
                player.sendMessage(Message.getMessage("noArgs"));
                return true;
            }
-           Player target = Bukkit.getPlayer(args[1]);
-           if (target == null) {
-               player.sendMessage(Replacer.value(Message.getMessage("noPlayer"), args[1]));
-               return true;
-           }
-           if (clan.getRole(player) == Role.MEMBER) {
+           OfflinePlayer target = Bukkit.getOfflinePlayer(args[1]);
+            if (clan.getRole(player) == Role.MEMBER) {
                player.sendMessage(Message.getMessage("noPerm"));
                return true;
            }
@@ -176,11 +177,7 @@ public class ClanCommand implements CommandExecutor, TabCompleter {
                 player.sendMessage(Message.getMessage("noArgs"));
                 return true;
             }
-            Player target = Bukkit.getPlayer(args[1]);
-            if (target == null) {
-                player.sendMessage(Replacer.value(Message.getMessage("noPlayer"), args[1]));
-                return true;
-            }
+            OfflinePlayer target = Bukkit.getOfflinePlayer(args[1]);
             if (clan.getRole(player) != Role.OWNER) {
                 player.sendMessage(Message.getMessage("noPerm"));
                 return true;
@@ -206,11 +203,7 @@ public class ClanCommand implements CommandExecutor, TabCompleter {
                 player.sendMessage(Message.getMessage("noArgs"));
                 return true;
             }
-            Player target = Bukkit.getPlayer(args[1]);
-            if (target == null) {
-                player.sendMessage(Replacer.value(Message.getMessage("noPlayer"), args[1]));
-                return true;
-            }
+            OfflinePlayer target = Bukkit.getOfflinePlayer(args[1]);
             if (clan.getRole(player) != Role.OWNER) {
                 player.sendMessage(Message.getMessage("noPerm"));
                 return true;
@@ -236,11 +229,7 @@ public class ClanCommand implements CommandExecutor, TabCompleter {
                 player.sendMessage(Message.getMessage("noArgs"));
                 return true;
             }
-            Player target = Bukkit.getPlayer(args[1]);
-            if (target == null) {
-                player.sendMessage(Replacer.value(Message.getMessage("noPlayer"), args[1]));
-                return true;
-            }
+            OfflinePlayer target = Bukkit.getOfflinePlayer(args[1]);
             if ((clan.getRole(player) != Role.OWNER && (clan.getRole(target) == Role.ADMIN || clan.getRole(target) == Role.OWNER)) || (clan.getRole(player) == Role.MEMBER) || clan.getRole(player) == clan.getRole(target)) { // idk what im doing
                 player.sendMessage(Message.getMessage("noPerm"));
                 return true;
@@ -251,8 +240,31 @@ public class ClanCommand implements CommandExecutor, TabCompleter {
             }
             return true;
         });
+        subcommands.put("leave", context -> {
+            Player player = context.player();
+            Clan clan = context.clan();
+            if (clan == null) {
+                player.sendMessage(Message.getMessage("notInClan"));
+                return true;
+            }
+            if (clan.getRole(player) == Role.OWNER) {
+                player.sendMessage(Message.getMessage("cantLeaveOwn"));
+                return true;
+            }
+            for (Player p : clan.getOnlinePlayers()) {
+                p.sendMessage(Replacer.value(Message.getMessage("left"), player.getName()));
+            }
+            clan.removePlayer(player);
+            return true;
+        });
 
-        subcommandsub.put("invite", ctx -> null);
+        subcommandsub.put("invite", ctx -> {
+            List<String> complete = new ArrayList<>();
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                if (Clan.fromPlayer(player) == null) complete.add(player.getName());
+            }
+            return complete;
+        });
         subcommandsub.put("accept", ctx -> {
             List<String> complete = new ArrayList<>();
             if (invites.containsKey(ctx.player())) {
@@ -320,6 +332,55 @@ public class ClanCommand implements CommandExecutor, TabCompleter {
             }
            return complete;
         });
+        hasPerm.put("create", context -> context.clan() == null);
+        hasPerm.put("disband", context -> context.clan() != null && context.clan().getRole(context.player()) == Role.OWNER);
+        hasPerm.put("invite", context -> {
+            boolean isThereAny = false;
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                if (Clan.fromPlayer(player) == null) {
+                    isThereAny = true;
+                    break;
+                }
+            }
+            return context.clan() != null && (context.clan().getRole(context.player()) == Role.OWNER || context.clan().getRole(context.player()) == Role.ADMIN) && isThereAny;
+        });
+        hasPerm.put("accept", context -> context.clan() == null && !invites.getOrDefault(context.player, Set.of()).isEmpty());
+        hasPerm.put("promote", context -> {
+            if (context.clan() == null) return false;
+            boolean can = false;
+            for (OfflinePlayer op : context.clan().getPlayers()) {
+                if (context.clan().getRole(op) == Role.MEMBER) {
+                    can = true;
+                    break;
+                }
+            }
+            return context.clan().getRole(context.player()) == Role.OWNER || (context.clan().getRole(context.player()) == Role.ADMIN && can);
+        });
+        hasPerm.put("demote", context -> {
+            if (context.clan() == null) return false;
+            boolean can = false;
+            for (OfflinePlayer op : context.clan().getPlayers()) {
+                if (context.clan().getRole(op) == Role.ADMIN) {
+                    can = true;
+                    break;
+                }
+            }
+            return context.clan().getRole(context.player()) == Role.OWNER && can;
+        });
+        hasPerm.put("transfer", context -> context.clan() != null && context.clan().getRole(context.player()) == Role.OWNER);
+        hasPerm.put("kick", context -> {
+            if (context.clan() == null) return false;
+            boolean can = false;
+            for (OfflinePlayer op : context.clan().getPlayers()) {
+                if (context.clan().getRole(op) == Role.MEMBER) {
+                    can = true;
+                    break;
+                }
+            }
+            return (context.clan().getRole(context.player()) == Role.OWNER || context.clan().getRole(context.player()) == Role.ADMIN) && can;
+        });
+        hasPerm.put("leave", context -> context.clan() != null && context.clan().getRole(context.player()) != Role.OWNER);
+
     }
 
     @Override
@@ -334,7 +395,7 @@ public class ClanCommand implements CommandExecutor, TabCompleter {
             for (String subcommand : subcommands.keySet()) {
                 if (subcommand.equals(args[0])) {
                     if (sender.hasPermission("clancats.command.clan." + subcommand)) {
-                        return subcommands.get(subcommand).apply(new Context(player, clan, args));
+                        return subcommands.get(subcommand).apply(new Context(player ,clan, args));
                     } else {
                         player.sendMessage(Message.getMessage("noPerm"));
                         return true;
@@ -354,8 +415,10 @@ public class ClanCommand implements CommandExecutor, TabCompleter {
         List<String> complete = new ArrayList<>();
         if (args.length == 1) {
             for (String subcommand : subcommands.keySet()) {
-                if (sender.hasPermission("clancats.command.clan." + subcommand)) {
-                    complete.add(subcommand);
+                if (sender instanceof Player player) {
+                    if (sender.hasPermission("clancats.command.clan." + subcommand) && hasPerm.get(subcommand).apply(new Context(player, Clan.fromPlayer(player), args))) {
+                        complete.add(subcommand);
+                    }
                 }
             }
         } else if (args.length == 2) {
@@ -373,3 +436,4 @@ public class ClanCommand implements CommandExecutor, TabCompleter {
         return complete;
     }
 }
+// i should have made this in different classes and not in a big class

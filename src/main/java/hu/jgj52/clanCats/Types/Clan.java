@@ -40,17 +40,16 @@ public class Clan {
         plugin.reloadConfig();
     }
 
-    private final List<OfflinePlayer> players = new ArrayList<>();
+    private final List<UUID> players = new ArrayList<>();
     private String name;
     private final String id;
-    private final Map<OfflinePlayer, Role> roles = new HashMap<>();
+    private final Map<UUID, Role> roles = new HashMap<>();
     private Clan (String id) {
         this.id = id;
         List<String> players = plugin.getConfig().getStringList("data.clans." + id + ".players");
         for (String player : players) {
-            OfflinePlayer p = Bukkit.getOfflinePlayer(UUID.fromString(player));
-            this.players.add(p);
-            roles.put(p, Role.valueOf(plugin.getConfig().getString("data.clans." + id + ".roles." + player)));
+            this.players.add(UUID.fromString(player));
+            roles.put(UUID.fromString(player), Role.valueOf(plugin.getConfig().getString("data.clans." + id + ".roles." + player)));
         }
         this.name = plugin.getConfig().getString("data.clans." + id + ".name");
     }
@@ -60,12 +59,16 @@ public class Clan {
     }
 
     public List<OfflinePlayer> getPlayers() {
+        List<OfflinePlayer> players = new ArrayList<>();
+        for (UUID uuid : this.players) {
+            players.add(Bukkit.getOfflinePlayer(uuid));
+        }
         return players;
     }
 
     public List<Player> getOnlinePlayers() {
         List<Player> players = new ArrayList<>();
-        for (OfflinePlayer op : this.players) {
+        for (OfflinePlayer op : getPlayers()) {
             if (op.getPlayer() != null) {
                 players.add(op.getPlayer());
             }
@@ -85,7 +88,7 @@ public class Clan {
         plugin.getConfig().set("data.clans." + id + ".players", players);
         setRole(player, Role.MEMBER);
         save();
-        this.players.add(player);
+        this.players.add(player.getUniqueId());
     }
 
     public void addPlayer(Player player) {
@@ -97,7 +100,7 @@ public class Clan {
         players.remove(player.getUniqueId().toString());
         plugin.getConfig().set("data.clans." + id + ".players", players);
         save();
-        this.players.remove(player);
+        this.players.remove(player.getUniqueId());
     }
 
     public void removePlayer(Player player) {
@@ -105,17 +108,17 @@ public class Clan {
     }
 
     public Role getRole(OfflinePlayer player) {
-        return roles.get(player);
+        return roles.get(player.getUniqueId());
     }
 
     public Role getRole(Player player) {
-        return roles.get(Bukkit.getOfflinePlayer(player.getUniqueId()));
+        return getRole(Bukkit.getOfflinePlayer(player.getUniqueId()));
     }
 
     public void setRole(OfflinePlayer player, Role role) {
         plugin.getConfig().set("data.clans." + id + ".roles." + player.getUniqueId(), role.name());
         save();
-        roles.put(player, role);
+        roles.put(player.getUniqueId(), role);
     }
 
     public void setRole(Player player, Role role) {

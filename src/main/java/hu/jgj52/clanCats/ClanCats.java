@@ -1,6 +1,7 @@
 package hu.jgj52.clanCats;
 
 import hu.jgj52.clanCats.Commands.ClanCommand;
+import hu.jgj52.clanCats.Listener.ClickListener;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class ClanCats extends JavaPlugin {
@@ -14,9 +15,14 @@ public final class ClanCats extends JavaPlugin {
         getConfig().options().copyDefaults(true);
         saveConfig();
 
+        if (!(getConfig().getInt("maxPlayersInClan") >= 2 && getConfig().getInt("maxPlayersInClan") <= 28)) {
+            getLogger().info("§cIn config, maxPlayersInClan has to be a number from 2 to 28");
+            getServer().getPluginManager().disablePlugin(this);
+        }
+
         getCommand("clan").setExecutor(new ClanCommand());
 
-        //todo: listener for MyClanGUI so players wont steal the heads and stuff
+        getServer().getPluginManager().registerEvents(new ClickListener(), this);
     }
 
     @Override

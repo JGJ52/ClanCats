@@ -19,7 +19,10 @@ messages:
   demoted: "§c%value% got demoted!" # value = the player's name who got demoted
   transferred: "§e%value% became the new owner of the clan!" # value = the player's name who became owner
   clanFull: "§cThe clan is full! You can't invite anymore members."
+  clanBecameFull: "§cThe clan you are trying to join became full. (Probably two invites were sent with one place left and the other player joined sooner.)"
   kicked: "§c%value% got kicked out of the clan." # value = kicked player's name
+  left: "§e%value% left the clan" # value = value = left player's name
+  cantLeaveOwn: "§cYou can't leave your own clan! If you really want to leave tho, use /clan disband or /clan transfer <player>"
 guis:
   MyClanGUI:
     title: "My clan"
