@@ -11,7 +11,7 @@ import java.util.*;
 import static hu.jgj52.clanCats.ClanCats.plugin;
 
 public class Clan {
-    private static Map<String, Clan> clans = new HashMap<>();
+    private static final Map<String, Clan> clans = new HashMap<>();
     public static Clan of(String id) {
         if (clans.containsKey(id)) {
             return clans.get(id);
@@ -127,6 +127,7 @@ public class Clan {
 
     public void disband() {
         plugin.getConfig().set("data.clans." + id, null);
+        clans.remove(id);
         save();
     }
 }

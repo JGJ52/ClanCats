@@ -23,6 +23,7 @@ messages:
   kicked: "§c%value% got kicked out of the clan." # value = kicked player's name
   left: "§e%value% left the clan" # value = value = left player's name
   cantLeaveOwn: "§cYou can't leave your own clan! If you really want to leave tho, use /clan disband or /clan transfer <player>"
+  cantAttackTeammate: "§cYou can't attack your clanmate!"
 guis:
   MyClanGUI:
     title: "My clan"

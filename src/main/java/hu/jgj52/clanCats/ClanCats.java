@@ -2,6 +2,7 @@ package hu.jgj52.clanCats;
 
 import hu.jgj52.clanCats.Commands.ClanCommand;
 import hu.jgj52.clanCats.Listener.ClickListener;
+import hu.jgj52.clanCats.Listener.PlayerDamageListener;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class ClanCats extends JavaPlugin {
@@ -23,6 +24,7 @@ public final class ClanCats extends JavaPlugin {
         getCommand("clan").setExecutor(new ClanCommand());
 
         getServer().getPluginManager().registerEvents(new ClickListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerDamageListener(), this);
     }
 
     @Override
