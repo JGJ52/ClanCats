@@ -35,9 +35,10 @@
     - You will also need the permission clancats.command.clan.<subcommand> to run the command, not just the scenario I described earlier
   - by default this opens a gui containing members of the group
   - permission: clancats.command.clan
-**Features**:
+    **Features**:
   - you can't hit your clanmates
   - that's it
+
 **Building**:
 ```shell
 git clone https://github.com/JGJ52/ClanCats.git
@@ -47,16 +48,16 @@ mvn clean package
 **Include this plugin in your project**:
 ```xml
 <repository>
-    <id>jgj52-repo</id>
-    <url>https://maven.jgj52.hu/repository/maven-releases/</url>
+  <id>jgj52-repo</id>
+  <url>https://maven.jgj52.hu/repository/maven-releases/</url>
 </repository>
 ```
 ```xml
 <dependency>
-    <groupId>hu.jgj52</groupId>
-    <artifactId>ClanCats</artifactId>
-    <version>1.0</version>
-    <scope>provided</scope>
+  <groupId>hu.jgj52</groupId>
+  <artifactId>ClanCats</artifactId>
+  <version>1.0</version>
+  <scope>provided</scope>
 </dependency>
 ```
 Example to get the name of a clan that the player "player214" is in:
